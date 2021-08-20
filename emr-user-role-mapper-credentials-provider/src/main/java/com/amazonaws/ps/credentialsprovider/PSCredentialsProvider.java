@@ -26,7 +26,7 @@ public class PSCredentialsProvider implements AWSCredentialsProvider
     }
 
     public PSCredentialsProvider(Configuration configuration) {
-        //TODO
+        //TODO: implement configuration
         this(new PSCredentialsFetcher());
     }
     /**

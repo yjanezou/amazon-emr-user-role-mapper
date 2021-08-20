@@ -24,8 +24,8 @@ public class PSCredentialsFetcher
 {
     private static final Log LOG = LogFactory.getLog(PSCredentialsFetcher.class);
 
-    //TODO: use property config to dynamically create the URI path
-    final private static String PERMISSION_SERVICE_PATH = "http://localhost:9944/latest/meta-data/iam/security-credentials/ps/";
+    //TODO: use property config to dynamically create the URI path for different envs, configure the right port
+    final private static String PERMISSION_SERVICE_PATH = "https://localhost:9944/latest/meta-data/iam/security-credentials/ps/aws";
     private URI permissionServiceURI;
 
     private final EC2ResourceFetcher resourceFetcher;
@@ -54,7 +54,7 @@ public class PSCredentialsFetcher
     @Override
     public String toString()
     {
-        return "PermissionServiceCredentialsFetcher";
+        return "PSCredentialsFetcher";
     }
 
     @Override

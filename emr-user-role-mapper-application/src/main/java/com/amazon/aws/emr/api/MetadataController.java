@@ -85,7 +85,7 @@ public class MetadataController {
     }
 
     @GET
-    @Path("{apiVersion}/meta-data/iam/security-credentials/ps/")
+    @Path("{apiVersion}/meta-data/iam/security-credentials/ps/aws")
     @Produces(MediaType.TEXT_PLAIN)
     public String getUserCredentialsCertBased(@Context HttpServletRequest httpServletRequest) {
         log.debug("Processing a request to get credentials based on mTLS certification");
@@ -185,9 +185,9 @@ public class MetadataController {
 
     private Optional<String> identifyCallerWithCert(HttpServletRequest httpServletRequest) {
         X509Certificate cert = CertUtil.getCertificate(httpServletRequest);
-        // this is for phrase 1: use the OU from the cert as the username
+        // this is for phrase 1: use the OU from the cert to get the user name
         String orgUnit = CertUtil.getSubjectAttributes(cert).get(CertUtil.DN_ATTRIBUTE_OU);
-        return Optional.ofNullable(orgUnit);
+        return Optional.ofNullable(CertUtil.getTeamNameWithFlowsnakeStandard(orgUnit));
     }
 
     private Optional<String> identifyCaller(HttpServletRequest httpServletRequest,

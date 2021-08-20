@@ -28,6 +28,7 @@ public class CertUtil {
     static final String DN_ATTRIBUTE_COUNTRY = "C";
 
     private static final String SSL_CLIENT_CERT_HEADER = "ssl_client_cert";
+    private static final String FLOWSNAKE_OU_PREFIX = "fs-";
 
     /**
      *
@@ -64,5 +65,15 @@ public class CertUtil {
         }
 
         return result;
+    }
+
+    public static String getTeamNameWithFlowsnakeStandard(String orgUnit) {
+        if (StringUtils.isNullOrEmpty((orgUnit)) || !orgUnit.contains(FLOWSNAKE_OU_PREFIX)) {
+            return null;
+        }
+        String ouFields[] = orgUnit.split(FLOWSNAKE_OU_PREFIX);
+        // whether it's using "spiffe://trust-domain/fs-identifier" or not, the last field should be the team name
+        // TODO: double check with Flowsnake team
+        return ouFields.length == 0? null : ouFields[ouFields.length-1];
     }
 }
