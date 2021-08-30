@@ -88,7 +88,7 @@ public class MetadataController {
     @Path("{apiVersion}/meta-data/iam/security-credentials/ps/aws")
     @Produces(MediaType.TEXT_PLAIN)
     public String getUserCredentialsCertBased(@Context HttpServletRequest httpServletRequest) {
-        log.debug("Processing a request to get credentials based on mTLS certification");
+        log.info("[PermissionService]Processing a request to get credentials based on mTLS certification");
         Optional<AssumeRoleRequest> assumeRoleRequest = makeUserAssumeRoleRequestCertBased(httpServletRequest);
         return assumeRoleRequest
                 .map(request -> metadataCredentialsProvider.getUserCredentials(request))
@@ -180,13 +180,16 @@ public class MetadataController {
 
     private Optional<AssumeRoleRequest> makeUserAssumeRoleRequestCertBased(HttpServletRequest httpServletRequest) {
         Optional<String> username = identifyCallerWithCert(httpServletRequest);
+        log.info("[PermissionService] making user assume role request for user {}", username);
         return username.flatMap(user -> mappingInvoker.map(user));
     }
 
     private Optional<String> identifyCallerWithCert(HttpServletRequest httpServletRequest) {
         X509Certificate cert = CertUtil.getCertificate(httpServletRequest);
+        log.info("[PermissionService] Fetched certification from request: {}", cert.toString());
         // this is for phrase 1: use the OU from the cert to get the user name
-        String orgUnit = CertUtil.getSubjectAttributes(cert).get(CertUtil.DN_ATTRIBUTE_OU);
+        String orgUnit = CertUtil.getOU(cert);
+        log.info("[PermissionService] Fetched OU from request {}", orgUnit);
         return Optional.ofNullable(CertUtil.getTeamNameWithFlowsnakeStandard(orgUnit));
     }
 
