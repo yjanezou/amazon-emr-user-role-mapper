@@ -6,12 +6,18 @@ package com.amazon.aws.emr;
 import com.amazon.aws.emr.common.Constants;
 import com.amazon.aws.emr.ws.UserRoleMapperApplication;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.io.ByteBufferPool;
+import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.annotation.Name;
+import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.util.thread.Scheduler;
 import org.glassfish.jersey.servlet.ServletContainer;
+
+import java.util.concurrent.Executor;
 
 /**
  * Server that handles all user role mapping requests.
@@ -39,9 +45,25 @@ public class UserRoleMappingServer {
         Server jettyServer = new Server(pool);
         jettyServer.setHandler(context);
 
+        /*
         ServerConnector httpConnector = new ServerConnector(jettyServer);
         httpConnector.setPort(Constants.JETTY_PORT);
         jettyServer.addConnector(httpConnector);
+        */
+        // Setup SSL
+        SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
+        sslContextFactory.setKeyStorePath("server-key-store");
+        sslContextFactory.setKeyStorePassword("secret");
+        sslContextFactory.setKeyManagerPassword("secret");
+        sslContextFactory.setTrustStorePath("server-trust-store");
+        sslContextFactory.setTrustStorePassword("secret");
+        sslContextFactory.setWantClientAuth(true);
+        sslContextFactory.setNeedClientAuth(true);
+
+        ServerConnector httpsConnector = new ServerConnector(jettyServer, sslContextFactory);
+        httpsConnector.setPort(9943); //TODO: figure out the https port
+
+        jettyServer.addConnector(httpsConnector);
 
         ServletHolder jerseyServlet = context.addServlet(ServletContainer.class, "/*");
         jerseyServlet.setInitOrder(0);
@@ -60,4 +82,5 @@ public class UserRoleMappingServer {
             jettyServer.destroy();
         }
     }
-}
+
+    }
